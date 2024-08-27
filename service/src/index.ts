@@ -24,7 +24,7 @@ new Elysia()
   })
   .post(
     "/data",
-    ({ body }: { body: any }) => {
+    ({ body }) => {
       const query = db.query(
         "INSERT INTO metrics (timestamp, data) VALUES ($timestamp, $data)"
       );
@@ -45,12 +45,12 @@ new Elysia()
   )
   .post(
     "/gps",
-    (context) => {
+    ({ body }) => {
       const query = db.query(
         "INSERT INTO metrics (timestamp, data) VALUES ($timestamp, $data)"
       );
 
-      context.body.locations.forEach((loc) => {
+      body.locations.forEach((loc) => {
         query.run({
           $timestamp: new Date(loc.properties.timestamp).toISOString(),
           $data: JSON.stringify(loc),
@@ -64,7 +64,6 @@ new Elysia()
         locations: t.Array(
           t.Object({
             type: t.String(),
-            geometry: t.Object(t.Any()),
             properties: t.Object({
               timestamp: t.String({ format: "date-time" }),
             }),
