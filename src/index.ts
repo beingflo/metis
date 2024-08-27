@@ -1,1 +1,3 @@
-console.log("Hello via Bun!");
+import { Elysia } from "elysia";
+
+new Elysia().get("/", () => "Hello World").listen(3000);
