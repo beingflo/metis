@@ -1,3 +1,76 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
+import { Database } from "bun:sqlite";
 
-new Elysia().get("/", () => "Hello World").listen(3000);
+const db = new Database("./db.sqlite");
+db.run(`
+  CREATE TABLE IF NOT EXISTS metrics (
+      id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      timestamp TEXT NOT NULL,
+      data TEXT NOT NULL
+  );
+`);
+
+db.run(`CREATE INDEX IF NOT EXISTS ts_idx on metrics(timestamp);`);
+
+db.run("PRAGMA journal_mode = WAL;");
+db.run("PRAGMA synchronous = normal;");
+
+new Elysia()
+  .get("/", () => {
+    const qry = db.query("SELECT * FROM metrics LIMIT 10;");
+    const results = qry.all();
+
+    return results;
+  })
+  .post(
+    "/data",
+    ({ body }: { body: any }) => {
+      const query = db.query(
+        "INSERT INTO metrics (timestamp, data) VALUES ($timestamp, $data)"
+      );
+
+      query.run({
+        $timestamp: body.timestamp ?? new Date().toISOString(),
+        $data: JSON.stringify(body.data),
+      });
+
+      return 200;
+    },
+    {
+      body: t.Object({
+        data: t.Any(),
+        timestamp: t.Optional(t.String({ format: "date-time" })),
+      }),
+    }
+  )
+  .post(
+    "/gps",
+    (context) => {
+      const query = db.query(
+        "INSERT INTO metrics (timestamp, data) VALUES ($timestamp, $data)"
+      );
+
+      context.body.locations.forEach((loc) => {
+        query.run({
+          $timestamp: new Date(loc.properties.timestamp).toISOString(),
+          $data: JSON.stringify(loc),
+        });
+      });
+
+      return 200;
+    },
+    {
+      body: t.Object({
+        locations: t.Array(
+          t.Object({
+            type: t.String(),
+            geometry: t.Object(t.Any()),
+            properties: t.Object({
+              timestamp: t.String({ format: "date-time" }),
+            }),
+          })
+        ),
+      }),
+    }
+  )
+  .listen(3000);
