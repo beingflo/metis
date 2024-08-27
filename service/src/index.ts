@@ -1,7 +1,8 @@
 import { Elysia, t } from "elysia";
 import { Database } from "bun:sqlite";
 
-const db = new Database("./db.sqlite");
+const db = new Database("./db/db.sqlite");
+
 db.run(`
   CREATE TABLE IF NOT EXISTS metrics (
       id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -63,7 +64,6 @@ new Elysia()
       body: t.Object({
         locations: t.Array(
           t.Object({
-            type: t.String(),
             properties: t.Object({
               timestamp: t.String({ format: "date-time" }),
             }),
