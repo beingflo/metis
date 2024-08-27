@@ -74,3 +74,5 @@ new Elysia()
     }
   )
   .listen(3000);
+
+console.log("Metis stated listening on port 3000!");
