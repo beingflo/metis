@@ -4,30 +4,30 @@ import { Database } from "bun:sqlite";
 const db = new Database("./db/db.sqlite");
 
 db.run(`
-  CREATE TABLE IF NOT EXISTS metrics (
+  CREATE TABLE IF NOT EXISTS data (
       id INTEGER PRIMARY KEY AUTOINCREMENT, 
       timestamp TEXT NOT NULL,
       data TEXT NOT NULL
   );
 `);
 
-db.run(`CREATE INDEX IF NOT EXISTS ts_idx on metrics(timestamp);`);
+db.run(`CREATE INDEX IF NOT EXISTS ts_idx on data(timestamp);`);
 
 db.run("PRAGMA journal_mode = WAL;");
 db.run("PRAGMA synchronous = normal;");
 
 new Elysia()
-  .get("/", () => {
-    const qry = db.query("SELECT * FROM metrics LIMIT 10;");
+  .get("/data", () => {
+    const qry = db.query("SELECT * FROM data LIMIT 10;");
     const results = qry.all();
 
     return results;
   })
   .post(
-    "/data",
+    "/push",
     ({ body }) => {
       const query = db.query(
-        "INSERT INTO metrics (timestamp, data) VALUES ($timestamp, $data)"
+        "INSERT INTO data (timestamp, data) VALUES ($timestamp, $data)"
       );
 
       query.run({
@@ -45,10 +45,10 @@ new Elysia()
     }
   )
   .post(
-    "/gps",
+    "/push/gps",
     ({ body }) => {
       const query = db.query(
-        "INSERT INTO metrics (timestamp, data) VALUES ($timestamp, $data)"
+        "INSERT INTO data (timestamp, data) VALUES ($timestamp, $data)"
       );
 
       body.locations.forEach((loc) => {
