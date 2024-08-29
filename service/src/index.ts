@@ -44,34 +44,20 @@ new Elysia()
       }),
     }
   )
-  .post(
-    "/push/gps",
-    ({ body }) => {
-      const query = db.query(
-        "INSERT INTO data (timestamp, data) VALUES ($timestamp, $data)"
-      );
+  .post("/push/gps", ({ body }: { body: any }) => {
+    const query = db.query(
+      "INSERT INTO data (timestamp, data) VALUES ($timestamp, $data)"
+    );
 
-      body.locations.forEach((loc) => {
-        query.run({
-          $timestamp: new Date(loc.properties.timestamp).toISOString(),
-          $data: JSON.stringify(loc),
-        });
+    body.locations.forEach((loc: any) => {
+      query.run({
+        $timestamp: new Date(loc.properties.timestamp).toISOString(),
+        $data: JSON.stringify(loc),
       });
+    });
 
-      return 200;
-    },
-    {
-      body: t.Object({
-        locations: t.Array(
-          t.Object({
-            properties: t.Object({
-              timestamp: t.String({ format: "date-time" }),
-            }),
-          })
-        ),
-      }),
-    }
-  )
+    return 200;
+  })
   .listen(3007);
 
 console.log("Metis stated listening on port 3007!");
