@@ -56,7 +56,9 @@ new Elysia()
       });
     });
 
-    return 200;
+    return {
+      result: "ok",
+    };
   })
   .listen(3007);
 
