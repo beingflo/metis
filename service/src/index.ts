@@ -18,7 +18,9 @@ db.run("PRAGMA synchronous = normal;");
 
 new Elysia()
   .get("/data", () => {
-    const qry = db.query("SELECT * FROM data LIMIT 10;");
+    const qry = db.query(
+      "SELECT * FROM data ORDER BY timestamp DESC LIMIT 100;"
+    );
     const results = qry.all();
 
     return results;
