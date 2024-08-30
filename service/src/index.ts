@@ -62,6 +62,14 @@ new Elysia()
       result: "ok",
     };
   })
+  .get("/data/gps", ({ body }: { body: any }) => {
+    const qry = db.query(
+      "SELECT data ->> '$.geometry.coordinates[0]' as longitude, data ->> '$.geometry.coordinates[1]' as latitude FROM data ORDER BY timestamp;"
+    );
+    const results = qry.all() as Array<{ longitude: number; latitude: number }>;
+
+    return results?.map((r) => `${r.latitude}, ${r.longitude}`)?.join("\n");
+  })
   .listen(3007);
 
 console.log("Metis stated listening on port 3007!");
