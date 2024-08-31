@@ -2,9 +2,9 @@ import type Elysia from "elysia";
 import { t } from "elysia";
 import { db } from "./db";
 
-export const dataGroup = (app: Elysia<"">) =>
+export const dataGroup = (app: Elysia<"/data">) =>
   app
-    .get("/data", () => {
+    .get("/last", () => {
       const qry = db.query(
         "SELECT * FROM data ORDER BY timestamp DESC LIMIT 100;"
       );
@@ -13,7 +13,7 @@ export const dataGroup = (app: Elysia<"">) =>
       return results;
     })
     .post(
-      "/data",
+      "/",
       ({ body }) => {
         const query = db.query(
           "INSERT INTO data (timestamp, data) VALUES ($timestamp, $data)"
