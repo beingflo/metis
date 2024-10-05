@@ -5,9 +5,7 @@ import { db } from "./db";
 export const dataGroup = (app: Elysia<"/data">) =>
   app
     .get("/last", () => {
-      const qry = db.query(
-        "SELECT * FROM data ORDER BY timestamp DESC LIMIT 100;"
-      );
+      const qry = db.query("SELECT * FROM data ORDER BY timestamp DESC;");
       const results = qry.all();
 
       return results;
